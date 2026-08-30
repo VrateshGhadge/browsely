@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
+    "@clerk/nextjs": "^7.8.3",
+    "@clerk/ui": "^1.31.0",
     "@shadcn/react": "^0.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -36,7 +38,7 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
