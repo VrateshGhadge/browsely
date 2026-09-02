@@ -38,7 +38,10 @@ export default async function RootLayout({
       )}
     >
       <body suppressHydrationWarning>
-        <ClerkProvider appearance={{ theme: shadcn }} >
+        <ClerkProvider
+          appearance={{ theme: shadcn }}
+          taskUrls={{ 'choose-organization': '/choose-organization' }}
+        >
           <ThemeProvider>{children}</ThemeProvider>
           <Toaster />
         </ClerkProvider>
