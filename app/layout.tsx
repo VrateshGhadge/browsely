@@ -9,6 +9,7 @@ import "@clerk/ui/themes/shadcn.css"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils";
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 const geist = Geist({
   subsets: ["latin"],
@@ -42,7 +43,11 @@ export default async function RootLayout({
           appearance={{ theme: shadcn }}
           taskUrls={{ 'choose-organization': '/choose-organization' }}
         >
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <TooltipProvider>
+              {children}
+            </TooltipProvider>
+          </ThemeProvider>
           <Toaster />
         </ClerkProvider>
       </body>
