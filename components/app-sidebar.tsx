@@ -1,23 +1,20 @@
-'use client'
-
 import * as React from "react"
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs"
-import { PlusIcon, WorkflowIcon } from "lucide-react"
 
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+
+import { WorkflowNav } from "@/features/workflows/components/workflow-nav"
 
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupAction,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarTrigger
+  SidebarTrigger,
 } from "@/components/ui/sidebar"
 
 const workflows = [
@@ -33,7 +30,6 @@ const workflows = [
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-    const [activeWorkflow, setActiveWorkflow] = React.useState(workflows[0])
 
   return (
     <Sidebar variant="inset" collapsible="icon" {...props}>
@@ -49,42 +45,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             />
             <SidebarTrigger/>
         </SidebarHeader>
-            <SidebarContent>
-                <SidebarGroup> 
-                    <SidebarGroupLabel> Workflows</SidebarGroupLabel>
-                    <SidebarGroupAction title="New workflow">
-                        <PlusIcon />
-                        <span className="sr-only">New workflow</span>
-                    </SidebarGroupAction>
-                    <SidebarGroupContent>
-                        <SidebarMenu className="gap-y-0.5">
-                            {workflows.map((workflow) => (
-                                <SidebarMenuItem key={workflow}>
-                                    <SidebarMenuButton
-                                        isActive={activeWorkflow === workflow}
-                                        onClick={() => setActiveWorkflow(workflow)}
-                                        tooltip={workflow}
-                                    >
-                                        <WorkflowIcon />
-                                        <span>{workflow}</span>
-                                    </SidebarMenuButton> 
-                                </SidebarMenuItem>
-                            ))}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
-            </SidebarContent>
-            <SidebarFooter className="group-data-[collapsible=icon]:items-center">
-                <UserButton
-                    appearance={{
-                        elements: {
-                            rootBox: "w-full",
-                            userButtonTrigger: "w-full justify-start group-data-[collapsible=icon]:justify-center",
-                            userButtonOuterIdentifier: "group-data-[collapsible=icon]:hidden",
-                        }
-                    }}
-                />
-            </SidebarFooter>
+        <SidebarContent>
+            <WorkflowNav />
+        </SidebarContent>
+        <SidebarFooter className="group-data-[collapsible=icon]:items-center">
+            <UserButton
+                appearance={{
+                    elements: {
+                        rootBox: "w-full",
+                        userButtonTrigger: "w-full justify-start group-data-[collapsible=icon]:justify-center",
+                        userButtonOuterIdentifier: "group-data-[collapsible=icon]:hidden",
+                    }
+                }}
+            />
+        </SidebarFooter>
     </Sidebar>
   )
 }
