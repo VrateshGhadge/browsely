@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from "react"
-import { OrganizationSwitcher, UserButton } from "@clerk/nextjs"
 import { PlusIcon, WorkflowIcon } from "lucide-react"
 
 import {

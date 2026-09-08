@@ -1,12 +1,6 @@
 import * as React from "react"
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs"
 
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
-
 import { WorkflowNav } from "@/features/workflows/components/workflow-nav"
 
 import {
