@@ -34,4 +34,6 @@ export async function runWorkflowAction(name: string) {
      const handle = await tasks.trigger<typeof helloWorldTask>("hello-world", {
         message: "Hello from the right sidebar!",
      })
+
+     return handle
 }
