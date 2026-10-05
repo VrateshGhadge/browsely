@@ -24,10 +24,6 @@ const nodeTypes = {
   step: StepNode,
 }
 
-// const initialNodes : Node[] = [
-//   { id: '1', position: { x: 0, y: 0 }, data: { label: 'Node 1' } },
-//   { id: '2', position: { x: 0, y: 100 }, data: { label: 'Node 2' } },
-// ]
 const initialNodes: StepNodeType[] = [
   {
     id: '1',
@@ -39,7 +35,18 @@ const initialNodes: StepNodeType[] = [
       title: 'Start',
       values: {},
     },
-  }
+  },
+  // {
+  //   id: 'open-url',
+  //   type: "step",
+  //   position: { x: 0, y: 150 },
+  //   data: {
+  //     type: 'open-url',
+  //     kind: 'action',
+  //     title: 'Open URL',
+  //     values: { },
+  //   }
+  // }
 ]
 
 const initialEdges : Edge[] = []
