@@ -10,6 +10,8 @@ interface WorkflowShellProps{
     workflowId: string
 }
 
+import Canvas  from "@/features/workflows/components/canvas"
+
 
 export default function WorkflowShell({ workflowId } : WorkflowShellProps) {
     return (
@@ -17,9 +19,10 @@ export default function WorkflowShell({ workflowId } : WorkflowShellProps) {
             <ResizablePanel minSize="30rem">
                 <ResizablePanelGroup orientation="vertical">
                     <ResizablePanel className="18rem">
-                        <div className="flex size-full items-center justify-center text-muted-foreground">
+                        {/* <div className="flex size-full items-center justify-center text-muted-foreground">
                             Canvas
-                        </div>
+                        </div> */}
+                        <Canvas />
                     </ResizablePanel>
                     <ResizableHandle />
 
