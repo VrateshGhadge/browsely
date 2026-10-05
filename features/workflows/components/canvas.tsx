@@ -12,17 +12,37 @@ import {
   useNodesState,
   type Connection,
   type Edge,
-  type Node,
   type ColorMode,
   ConnectionLineType,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
-const initialNodes : Node[] = [
-  { id: '1', position: { x: 0, y: 0 }, data: { label: 'Node 1' } },
-  { id: '2', position: { x: 0, y: 100 }, data: { label: 'Node 2' } },
+import { StepNode } from '@/features/workflows/components/step-node'
+import type { StepNodeType } from '@/features/workflows/nodes/node-registry'
+
+const nodeTypes = {
+  step: StepNode,
+}
+
+// const initialNodes : Node[] = [
+//   { id: '1', position: { x: 0, y: 0 }, data: { label: 'Node 1' } },
+//   { id: '2', position: { x: 0, y: 100 }, data: { label: 'Node 2' } },
+// ]
+const initialNodes: StepNodeType[] = [
+  {
+    id: '1',
+    type: 'step',
+    position: { x: 0, y: 0 },
+    data: {
+      type: 'start',
+      kind: 'trigger',
+      title: 'Start',
+      values: {},
+    },
+  }
 ]
-const initialEdges : Edge[] = [{ id: 'e1-2', source: '1', target: '2' }]
+
+const initialEdges : Edge[] = []
 
 function useMounted(){
   return useSyncExternalStore(
@@ -51,6 +71,7 @@ export default function Canvas() {
   return (
     <div className="size-full">
       <ReactFlow
+        nodeTypes={nodeTypes}
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
