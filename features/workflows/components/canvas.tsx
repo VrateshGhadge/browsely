@@ -1,24 +1,26 @@
 "use client"
 
-import { useCallback, useSyncExternalStore } from 'react'
+import { useSyncExternalStore } from 'react'
 import { useTheme } from 'next-themes'
 import {
   ReactFlow,
   // MiniMap,
   Controls,
   // Background,
-  addEdge,
-  useEdgesState,
-  useNodesState,
-  type Connection,
   type Edge,
   type ColorMode,
   ConnectionLineType,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
+
 import { StepNode } from '@/features/workflows/components/step-node'
 import type { StepNodeType } from '@/features/workflows/nodes/node-registry'
+
+import { useLiveblocksFlow, Cursors } from "@liveblocks/react-flow";
+import "@xyflow/react/dist/style.css";
+import "@liveblocks/react-ui/styles.css";
+import "@liveblocks/react-flow/styles.css";
 
 const nodeTypes = {
   step: StepNode,
@@ -67,13 +69,25 @@ export default function Canvas() {
     ?(resolvedTheme as ColorMode) ?? "light"
     : "light"
 
-  const [nodes, , onNodesChange] = useNodesState(initialNodes)
-  const [edges, setEdges, onEdgeChange] = useEdgesState(initialEdges)
+  // const [nodes, , onNodesChange] = useNodesState(initialNodes)
+  // const [edges, setEdges, onEdgeChange] = useEdgesState(initialEdges)
 
-  const onConnect = useCallback(
-    (connection: Connection) => setEdges((eds) => addEdge(connection, eds)),
-    [setEdges]
-  )
+  // const onConnect = useCallback(
+  //   (connection: Connection) => setEdges((eds) => addEdge(connection, eds)),
+  //   [setEdges]
+  // )
+
+  const {
+    nodes,
+    edges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    onDelete,
+  } = useLiveblocksFlow({
+    suspense: true,
+    nodes: {initial : initialNodes},
+  })
 
   return (
     <div className="size-full">
@@ -82,8 +96,9 @@ export default function Canvas() {
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
-        onEdgesChange={onEdgeChange}
+        onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onDelete={onDelete}
         colorMode={colorMode}
         fitView
         connectionLineType={ConnectionLineType.SmoothStep}
@@ -102,6 +117,7 @@ export default function Canvas() {
       >
         {/* <Background /> */}
         <Controls />
+        <Cursors />
         {/* <MiniMap /> */}
       </ReactFlow>
     </div>
