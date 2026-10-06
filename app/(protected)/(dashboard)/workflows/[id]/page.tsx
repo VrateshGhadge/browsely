@@ -22,8 +22,8 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   }
  
   await liveblocks.getOrCreateRoom(id, {
+    organizationId: orgId,
     defaultAccesses: [],
-
     groupsAccesses: {
       [orgId]: ["room:write"],
     },
