@@ -10,8 +10,12 @@ import {
   type Edge,
   type ColorMode,
   ConnectionLineType,
+  NodeTypes,
+  Panel
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
+
+import { AvatarStack } from "@liveblocks/react-ui";
 
 
 import { StepNode } from '@/features/workflows/components/step-node'
@@ -22,7 +26,10 @@ import "@xyflow/react/dist/style.css";
 import "@liveblocks/react-ui/styles.css";
 import "@liveblocks/react-flow/styles.css";
 
-const nodeTypes = {
+// const nodeTypes = {
+//   step: StepNode,
+// }
+const nodeTypes: NodeTypes = {
   step: StepNode,
 }
 
@@ -119,6 +126,9 @@ export default function Canvas() {
         <Controls />
         <Cursors />
         {/* <MiniMap /> */}
+        <Panel position="top-right">
+          <AvatarStack />
+        </Panel>
       </ReactFlow>
     </div>
   )

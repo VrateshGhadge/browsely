@@ -18,7 +18,28 @@ export function Room({
   return (
     <LiveblocksProvider
         throttle={16}
-        authEndpoint="/api/liveblocks/auth">
+        authEndpoint="/api/liveblocks/auth"
+        resolveUsers  = {async ({ userIds }) => {
+          try{
+            const response = await fetch("/api/liveblocks/users", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ userIds }),
+            });
+
+            if (!response.ok) {
+              throw new Error(`Failed to resolve users: ${response.statusText}`);
+            }
+            
+            return response.json();
+          } catch (error) {
+              return undefined;
+          }
+        }}
+      >
+        
       <RoomProvider id={roomId}>
         <ClientSideSuspense 
             fallback={
