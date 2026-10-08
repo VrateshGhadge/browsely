@@ -2,6 +2,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { notFound } from "next/navigation";
 import { getWorkflow } from "@/features/workflows/data";
+import { ReactFlowProvider } from '@xyflow/react';
 
 import { Room } from "@/features/workflows/components/room";
 import  WorkflowShell  from "@/features/workflows/components/workflow-shell"
@@ -34,10 +35,16 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   });
 
 
+  // the canvas and the sidebars node pallette live in seperate components, so a single ReactFlowProvider wraps
+  // boths to give them access to same react flow state/store
+  // this is because in workkflow shell the canvas has the access of useLiveblocksFlow but the right sidebar does not
+  //  so we need to wrap both in a single ReactFlowProvider so they can share the same state/store
 
   return(
     <Room roomId={id}>
-      <WorkflowShell workflowId={id}/>
-     </Room> 
+      <ReactFlowProvider>
+        <WorkflowShell workflowId={id}/>
+      </ReactFlowProvider>
+    </Room> 
   )
 }

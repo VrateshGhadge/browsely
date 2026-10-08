@@ -31,6 +31,9 @@ import {
   type StepNodeType,
 } from "@/features/workflows/nodes/node-registry"
 
+import { useReactFlow, useStore } from "@xyflow/react"
+import { toast } from "sonner"
+
 // RightSidebar renders workflow actions plus Toolbar and Editor tabs.
 // Helpers are defined just above where they are used, ending with RightSidebar.
 
@@ -150,9 +153,41 @@ const definitions = Object.values(nodeRegistry)
 
 // The Toolbar tab: a button per node type that adds it to the canvas.
 function Palette() {
+
+  const { getNodes, getViewport, addNodes } = useReactFlow<StepNodeType>()
+
+  const width = useStore((s) => s.width)
+  const height = useStore((s) => s.height)
+
   const add = (type: NodeType) => {
     // TODO: add the clicked node to the canvas (one trigger max).
-    void type
+    const def = nodeRegistry[type]
+    const nodes = getNodes()
+    
+    if (def.kind === "trigger" && nodes.some((n) => n.data.kind === "trigger")) {
+      toast.error("Only one trigger node is allowed per workflow.")
+      return
+    }
+
+    const count = nodes.filter((n) => n.data.type === type).length
+    const title = `${def.label} ${count + 1}`
+
+    const { x, y, zoom } = getViewport()
+    const position = {
+      x:  (width / 2 - x) / zoom, 
+      y:  (height / 2 - y) / zoom 
+    }
+    addNodes({
+      id: crypto.randomUUID(),
+      type: "step",
+      position,
+      data: {
+        type,
+        kind: def.kind,
+        title,
+        values: {},
+      },
+    })
   }
 
   return (
