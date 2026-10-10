@@ -285,6 +285,12 @@ export function RightSidebar() {
   const selected = useStore((s) => s.nodes.find((n) => n.selected)) as StepNodeType | undefined
 
   // TODO: auto-switch to the Editor tab when the selection changes.
+  // this is for when the user clicks the action node it would redirect it to editor tab and show the properties of the node.
+  const [ prevSectionId, setPrevSectionId ] = useState(selected?.id)
+  if (selected && selected.id !== prevSectionId) {
+    setPrevSectionId(selected.id)
+    setTab("editor")
+  }
 
   return (
     <ResizablePanel
