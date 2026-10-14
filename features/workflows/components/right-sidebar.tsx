@@ -22,6 +22,8 @@ import { ResizablePanel } from "@/components/ui/resizable"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
+import { Textarea } from "@/components/ui/textarea"
+
 import {
   nodeRegistry,
   type NodeDefinition,
@@ -80,7 +82,7 @@ function Section({
 // Editor tab renders one input per field of the selected node.
 
 // A single editor field for a node property.
-function FieldInput({
+function Field({
   field,
   value,
   onChange,
@@ -90,6 +92,16 @@ function FieldInput({
   onChange: (value: string) => void
 }) {
   // TODO: support a multiline field variant (textarea).
+  if (field.multiline) {
+    return (
+      <Textarea
+        id={field.key}
+        value={value}
+        placeholder={field.placeholder}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    )
+  }
   return (
     <Input
       id={field.key}
@@ -127,7 +139,8 @@ function Inspector({ node }: { node: StepNodeType | undefined }) {
               <Label htmlFor={field.key} className="text-xs">
                 {field.label}
               </Label>
-              <FieldInput
+              {field.required && <span className="text-destructive">*</span>}
+              <Field
                 field={field}
                 value={values[field.key] ?? ""}
                 onChange={(value) => {
