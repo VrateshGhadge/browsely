@@ -77,7 +77,9 @@ function ThemeHotkey() {
               e.target instanceof HTMLElement
                 ? `${e.target.tagName}.${e.target.className?.toString().slice(0, 80)}`
                 : String(e.target),
-            props,
+            props: Object.fromEntries(
+              Object.entries(props).map(([name, value]) => [name, typeof value])
+            ),
             stack: new Error().stack,
           }),
         })

@@ -6,7 +6,9 @@ export function listWorkflows(orgId:string) {
     return db
         .select()
         .from(workflows)
-        .where(eq(workflows.orgId, orgId))
+        .where(
+            eq(workflows.orgId, orgId)
+        )
         .orderBy(desc(workflows.createdAt))
 }
 
@@ -14,7 +16,12 @@ export async function getWorkflow(orgId:string, workflowId:string) {
     const [workflow] = await db
         .select()
         .from(workflows)
-        .where(and(eq(workflows.orgId, orgId), eq(workflows.id, workflowId)))
+        .where(
+            and(
+                eq(workflows.orgId, orgId), 
+                eq(workflows.id, workflowId)
+            )
+        )
 
     return workflow
 }
@@ -26,6 +33,23 @@ export async function createWorkflow(orgId:string, name:string) {
             orgId,
             name,
         })
+        .returning()
+
+    return workflow 
+}
+
+export async function deleteWorkflow(orgId:string, id:string) {
+    // Delete the workflow where:
+    // workflow.id === id
+    // AND workflow.orgId === orgId
+    const [workflow] = await db
+        .delete(workflows)
+        .where(
+            and(
+                eq(workflows.id, id), 
+                eq(workflows.orgId, orgId)
+            )
+        )
         .returning()
 
     return workflow 
