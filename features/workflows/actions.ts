@@ -5,7 +5,7 @@ import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 
 import { tasks, runs } from "@trigger.dev/sdk";
-import type { helloWorldTask } from "@/trigger/example"
+import type { runWorkflowTask } from "@/features/workflows/tasks/run-workflow"
 
 import { liveblocks } from "@/lib/liveblocks"
 
@@ -61,9 +61,10 @@ export async function runWorkflowAction({
 
     await saveWorkflowGraph({orgId, id, graph})
 
-     const handle = await tasks.trigger<typeof helloWorldTask>("hello-world", {
-        message: "Hello from the right sidebar!",
-     })
+     const handle = await tasks.trigger<typeof runWorkflowTask>("run-workflow", 
+        { workflowId: id, orgId },
+        { tags: [`workflow-${id}`] }
+    )
 
      return handle
 }
