@@ -1,6 +1,32 @@
 import { db } from "@/lib/db"
-import { workflows } from "@/lib/db/schema"
+import { workflows, WorkflowGraph } from "@/lib/db/schema"
 import { eq, desc, and } from "drizzle-orm"
+
+import { validateGraph } from "@/features/workflows/libs/validate-graph"
+
+export async function saveWorkflowGraph({orgId, id, graph}:{
+    orgId: string,
+    id: string,
+    graph: WorkflowGraph
+}) {
+    const problems = validateGraph(graph)
+    
+    if(problems.length > 0) throw new Error(`Workflow is invalid: ${problems.join(" ")}`)
+    
+    await db
+        .update(workflows)
+        .set({
+            graph,
+            updatedAt: new Date()
+        })
+        .where(
+            and(
+                eq(workflows.id, id), 
+                eq(workflows.orgId, orgId)
+            )
+        )
+
+}
 
 export function listWorkflows(orgId:string) {
     return db
