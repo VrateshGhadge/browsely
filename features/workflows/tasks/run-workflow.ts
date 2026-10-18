@@ -2,6 +2,8 @@ import toposort from "toposort"
 import { logger, task } from "@trigger.dev/sdk"
 
 import { getWorkflow } from "@/features/workflows/data"
+import { Stagehand, browserbase } from "@browserbasehq/stagehand"
+import { nodeExecutors } from "@/features/workflows/nodes/node-executers"
 
 // Define a background task that runs a saved workflow.
 export const runWorkflowTask = task({
@@ -52,6 +54,33 @@ export const runWorkflowTask = task({
       steps: order.length,
     })
 
+    let stagehand: Stagehand | undefined
+
+    const getStagehand = async (): Promise<Stagehand> => {
+      // Reuse the existing instance.
+      if (stagehand) return stagehand
+
+      // Launch a Browserbase browser.
+      // Pass the pre-uploaded Stagehand extension so the SDK skips provisioning it,
+      // which would read a bundled zip path that Trigger.dev's build rewrites.
+      const browser = await browserbase.launch({
+        apiKey: process.env.BROWSERBASE_API_KEY!,
+        extensionId: process.env.BROWSERBASE_EXTENSION_ID!,
+      })
+
+      // Create Stagehand using the v4 API.
+      stagehand = await Stagehand.create({
+        browser,
+        model: {
+          modelName: "google/gemini-2.5-flash",
+          apiKey: process.env.GOOGLE_API_KEY!,
+        },
+      })
+  
+      return stagehand
+    }
+
+
     // Go through the nodes in the calculated order.
     for (const id of order) {
       // Find the complete node object using its ID.
@@ -63,8 +92,11 @@ export const runWorkflowTask = task({
       // TODO: Execute the actual action for this node.
       // For example, open a URL or send an email.
       // Report progress so the UI can display the execution status.
+      const executor = nodeExecutors[node.data.type]
+      if (executor) await executor({ values: node.data.values, getStagehand })
     }
 
+    await stagehand?.close()
     // Return the number of steps processed by the loop.
     return { steps: order.length }
   },

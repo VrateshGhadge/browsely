@@ -55,3 +55,19 @@ export type StepNodeData = {
 }
 
 export type StepNodeType = Node<StepNodeData, "step">
+
+export type ActionNodeType = {
+  //what we want is to get all the node types that are of kind "action" from the nodeRegistry
+  // Kind in NodeType
+  [K in NodeType]:
+    // we have to fetch the type of nodeRegistry[K] and check if its kind is "action"
+    // [K] ["kind"] means we first take all the K i.e all the node types and then from that we only take 
+    // the ones that are of kind "action"
+    (typeof nodeRegistry)[K]["kind"] extends "action"
+      // if it is, we return K, otherwise we return never
+      ? K
+      : never
+  // [NodeType] means we remove the "never" types from the union and only keep the ones that are of kind "action"
+}[NodeType]
+
+
