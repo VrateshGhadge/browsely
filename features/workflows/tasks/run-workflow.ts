@@ -5,6 +5,9 @@ import { getWorkflow } from "@/features/workflows/data"
 import { Stagehand, browserbase } from "@browserbasehq/stagehand"
 import { nodeExecutors } from "@/features/workflows/nodes/node-executers"
 
+import { interpolate, type NodeOutputs } from "@/features/workflows/libs/interpolate"
+
+
 // Define a background task that runs a saved workflow.
 export const runWorkflowTask = task({
   // Unique ID for this Trigger.dev task.
@@ -81,6 +84,9 @@ export const runWorkflowTask = task({
     }
 
 
+    const outputs: NodeOutputs = {}
+
+
     // Go through the nodes in the calculated order.
     for (const id of order) {
       // Find the complete node object using its ID.
@@ -89,11 +95,23 @@ export const runWorkflowTask = task({
       // Log the name of the current step.
       logger.log(`Running step: ${node.data.title}`)
 
-      // TODO: Execute the actual action for this node.
+      
       // For example, open a URL or send an email.
       // Report progress so the UI can display the execution status.
       const executor = nodeExecutors[node.data.type]
-      if (executor) await executor({ values: node.data.values, getStagehand })
+      if(!executor) continue 
+      // if(!executor) continue in simple words means if the executor is not defined for the current node type, 
+      // skip this node and move to the next one.
+
+      // Swap {{ nodeId.path }} placeholders for upstream output before running.
+      const values = Object.fromEntries(
+        Object.entries(node.data.values).map(([key, text]) => [
+          key,
+          interpolate({ text, outputs }),
+        ])
+      )
+      outputs[id] = await executor({ values, getStagehand })
+
     }
 
     await stagehand?.close()
