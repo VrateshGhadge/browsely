@@ -5,12 +5,16 @@ import type { Stagehand } from "@browserbasehq/stagehand";
 // Export an async function so other files can use it.
 export async function openUrl({ stagehand, url }: { stagehand: Stagehand, url: string }) {
 
-    const page = await stagehand.browser.context.activePage() 
-    await page?.goto(url, { waitUntil: "load", timeout: 30_000 });
+    const page = await stagehand.browser.context.activePage()
+    if (!page) throw new Error("No active page to navigate")
+
+    if (!url?.trim()) throw new Error("Open URL node has no URL to navigate to")
+
+    await page.goto(url, { waitUntil: "load", timeout: 30_000 });
 
     return {
-        url: page?.url(),
-        title: await page?.title() 
+        url: await page.url(),
+        title: await page.title()
     }
  
 }

@@ -50,6 +50,7 @@ export function useUpstreamConnections(): UpstreamConnection[] {
       ) as StepNodeType[]
 
       // Process each previous node we found.
+      // parent of parents represents one node from the parents array at a time.
       for (const parent of parents) {
         // Skip this node if we've already visited it.
         if (visited.has(parent.id)) continue
@@ -80,4 +81,5 @@ export function useUpstreamConnections(): UpstreamConnection[] {
     )
   }, [selected, nodes, edges])
 }
+
 

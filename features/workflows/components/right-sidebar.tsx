@@ -39,6 +39,8 @@ import { toast } from "sonner"
 import { deleteWorkflowAction, runWorkflowAction } from "@/features/workflows/actions"
 import { validateGraph } from "@/features/workflows/libs/validate-graph"
 
+import { useUpstreamConnections } from "@/features/workflows/hooks/use-upstream-connections"
+
 // RightSidebar renders workflow actions plus Toolbar and Editor tabs.
 // Helpers are defined just above where they are used, ending with RightSidebar.
 
@@ -89,10 +91,12 @@ function Field({
   field,
   value,
   onChange,
+  onfocus,
 }: {
   field: NodeField
   value: string
   onChange: (value: string) => void
+  onfocus: () => void
 }) {
   // TODO: support a multiline field variant (textarea).
   if (field.multiline) {
@@ -101,6 +105,7 @@ function Field({
         id={field.key}
         value={value}
         placeholder={field.placeholder}
+        onFocus={onfocus}
         onChange={(e) => onChange(e.target.value)}
       />
     )
@@ -110,6 +115,7 @@ function Field({
       id={field.key}
       value={value}
       placeholder={field.placeholder}
+      onFocus={onfocus}
       onChange={(e) => onChange(e.target.value)}
     />
   )
@@ -119,6 +125,9 @@ function Field({
 function Inspector({ node }: { node: StepNodeType | undefined }) {
 
   const { updateNodeData } = useReactFlow<StepNodeType>()
+
+  const connections = useUpstreamConnections()
+  const [activeFieldKey, setActiveFieldKey] = useState<string | null>(null)
 
   if (!node) {
     return (
@@ -130,6 +139,19 @@ function Inspector({ node }: { node: StepNodeType | undefined }) {
 
   const { type, title, values } = node.data
   const def: NodeDefinition = nodeRegistry[type]
+
+  const targetKey = activeFieldKey ?? def.fields[0]?.key 
+  
+  const insertToken = (token: string) => {
+    if (!targetKey) return
+
+    updateNodeData(node.id, {
+      values: {
+        ...values,
+        [targetKey]: (values[targetKey] ?? "") + token,
+      },
+    })
+  }
 
   return (
     <Section title={title} icon={<NodeIcon type={type} />}>
@@ -148,6 +170,7 @@ function Inspector({ node }: { node: StepNodeType | undefined }) {
               <Field
                 field={field}
                 value={values[field.key] ?? ""}
+                onfocus={()=> setActiveFieldKey(field.key)}
                 onChange={(value) => {
                   updateNodeData(node.id, {
                     values: { ...values, [field.key]: value },
@@ -156,6 +179,27 @@ function Inspector({ node }: { node: StepNodeType | undefined }) {
               />
             </div>
           ))
+        )}
+        {/* Available upstream outputs — click to drop a token into the last
+          focused field (or the first field if none has been touched). */}
+        {connections.length > 0 && (
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-xs">Connections</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {connections.map((connection) => (
+                <button
+                  key={connection.token}
+                  type="button"
+                  onClick={() => insertToken(connection.token)}
+                  className="flex max-w-full items-center gap-1.5 rounded-md border
+                  border-border bg-card px-1.5 py-1 text-xs hover:bg-accent"
+                >
+                  <NodeIcon type={connection.nodeType} className="size-4" />
+                  <span className="truncate">{connection.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </Section>
@@ -361,7 +405,7 @@ export function RightSidebar({ workflowId }: { workflowId: string }) {
           <Palette />
         </TabsContent>
         <TabsContent value="editor" className="flex min-h-0 flex-col">
-          <Inspector node={selected} />
+          <Inspector key={selected?.id} node={selected} />
         </TabsContent>
       </Tabs>
     </ResizablePanel>
