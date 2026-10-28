@@ -1,11 +1,17 @@
 import toposort from "toposort"
-import { logger, task } from "@trigger.dev/sdk"
+import { logger, metadata, task } from "@trigger.dev/sdk"
 
 import { getWorkflow } from "@/features/workflows/data"
 import { Stagehand, browserbase } from "@browserbasehq/stagehand"
 import { nodeExecutors } from "@/features/workflows/nodes/node-executers"
 
 import { interpolate, type NodeOutputs } from "@/features/workflows/libs/interpolate"
+
+// Describes each node's ID and its current execution status.
+export type RunStep = {
+  nodeId: string,
+  status: "pending" | "running" | "done" | "failed",
+}
 
 
 // Define a background task that runs a saved workflow.
@@ -57,6 +63,14 @@ export const runWorkflowTask = task({
       steps: order.length,
     })
 
+    // Create a status entry for every node, starting with "pending".
+    const steps: RunStep[] = order.map((nodeId) => ({
+      nodeId,
+      status: "pending",
+    }))
+    // Publish the initial statuses to Trigger.dev's run metadata.
+    metadata.set("steps", steps)
+
     let stagehand: Stagehand | undefined
 
     const getStagehand = async (): Promise<Stagehand> => {
@@ -84,11 +98,15 @@ export const runWorkflowTask = task({
     }
 
 
+    // Store each node's result so later nodes can use its output.
     const outputs: NodeOutputs = {}
 
 
     // Go through the nodes in the calculated order.
-    for (const id of order) {
+    for (let i = 0; i < order.length; i++) {
+      const id = order[i]
+      const step = steps[i]
+      
       // Find the complete node object using its ID.
       const node = byId.get(id)!
 
@@ -100,10 +118,17 @@ export const runWorkflowTask = task({
       // Report progress so the UI can display the execution status.
       const executor = nodeExecutors[node.data.type]
       if(!executor) continue 
+
+      // Mark the node as running and publish immediately,
+      // so the UI can show its running indicator.
+      step.status = "running"
+      metadata.set("steps", steps)
+      await metadata.flush()
       // if(!executor) continue in simple words means if the executor is not defined for the current node type, 
       // skip this node and move to the next one.
 
       // Swap {{ nodeId.path }} placeholders for upstream output before running.
+      // Replace placeholders with outputs from previous nodes.
       const values = Object.fromEntries(
         Object.entries(node.data.values).map(([key, text]) => [
           key,
@@ -112,7 +137,23 @@ export const runWorkflowTask = task({
       )
       outputs[id] = await executor({ values, getStagehand })
 
+      try{
+        // Execute the node once and save its result.
+        outputs[id] = await executor({ values, getStagehand })
+      } catch (error) {
+        // Mark the node as failed and publish that status before stopping.
+        step.status = "failed"
+        metadata.set("steps", steps)
+        await metadata.flush()
+        await stagehand?.close()
+        throw error
+      }
+      // Mark successful execution as done and update the metadata.
+      step.status = "done"
+      metadata.set("steps", steps)
     }
+
+    
 
     await stagehand?.close()
     // Return the number of steps processed by the loop.
