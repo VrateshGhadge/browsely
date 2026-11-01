@@ -157,6 +157,6 @@ export const runWorkflowTask = task({
 
     await stagehand?.close()
     // Return the number of steps processed by the loop.
-    return { steps: order.length }
+    return { steps }
   },
 })
